@@ -5,4 +5,4 @@ A Custom Crosshair tool with a zoom feature fps games with long range fights.
 <img width="315" height="333" alt="image" src="https://github.com/user-attachments/assets/bd2e1e90-226b-4379-bb7c-de5308e663f0" />
 <img width="315" height="333" alt="image" src="https://github.com/user-attachments/assets/d4a2d708-0ca0-400f-a310-499e931aae48" />
 
-![videotogif-ezgif com-resize](https://github.com/user-attachments/assets/757246e3-9cca-4426-9c3b-92f10857ee14)
+![videotogif-ezgif com-resize (1)](https://github.com/user-attachments/assets/4bf8b3b6-3198-4950-bf20-6b272127e689)
