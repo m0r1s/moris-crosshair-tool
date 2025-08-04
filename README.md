@@ -1,4 +1,4 @@
-# moris Crosshair Tool v1.0
+# moris Crosshair Tool
 A customizable crosshair overlay tool built with AutoHotkey v2.0. 
 
 Great for all FPS type games and the Zoom feature is especially good for long range PvP games.
