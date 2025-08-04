@@ -36,7 +36,7 @@ Made by moris: https://discord.gg/moris or https://discord.gg/2fraBuhe3m
 
 ## 🚀 Getting Started
 1. Install AutoHotkey v2.0
-2. Run `moris crosshair tool v1.0.ahk`
+2. Run `moris crosshair tool.ahk`
 3. Create your own Crosshair and have Fun
 
 ---
