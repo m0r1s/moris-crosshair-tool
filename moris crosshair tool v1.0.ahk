@@ -159,7 +159,6 @@ SetTimer(CheckResolution, 1000)
 
 SetupZoomHotkey() {
     global
-    ; Clear any existing hotkeys
     if (currentHotkey != "") {
         try {
             Hotkey(currentHotkey, "Off")
@@ -173,10 +172,8 @@ SetupZoomHotkey() {
         try {
             currentHotkey := "*" . settings["zoomHotkey"]
             if (settings["zoomToggleMode"]) {
-                ; Toggle mode - only need key down event
                 Hotkey(currentHotkey, ZoomToggle, "On")
             } else {
-                ; Hold mode - need both key down and up events
                 Hotkey(currentHotkey, ZoomStart, "On")
                 Hotkey(currentHotkey " up", ZoomStop, "On")
             }
@@ -629,9 +626,8 @@ UpdateZoomSettings(*) {
 UpdateZoomToggleMode(*) {
     global
     oldToggleMode := settings["zoomToggleMode"]
-    settings["zoomToggleMode"] := (zoomModeDropdown.Value = 2) ; 1 = Hold, 2 = Toggle
+    settings["zoomToggleMode"] := (zoomModeDropdown.Value = 2)
     
-    ; If zoom is currently active and we're switching modes, stop zoom
     if (zoomActive && oldToggleMode != settings["zoomToggleMode"]) {
         zoomActive := false
         StopZoom()
@@ -918,10 +914,8 @@ SaveProfileList() {
 }
 
 LoadProfilesFromFiles() {
-    ; Clear the profile list first
     profileList.Delete()
-    
-    ; Method 1: Load from saved profile names list
+
     profileNames := IniRead("currentsettings.ini", "Profiles", "Names", "")
     loadedProfiles := Map()
     
@@ -941,34 +935,26 @@ LoadProfilesFromFiles() {
             }
         }
     }
-    
-    ; Method 2: Scan directory for .ini files that weren't in the list
-    ; This catches profiles that exist but weren't in the saved list
+
     Loop Files, "*.ini" {
-        ; Skip the main settings files
         if (A_LoopFileName = "currentsettings.ini" || A_LoopFileName = "settings.ini")
             continue
-            
-        ; Extract profile name from filename (remove .ini extension)
+
         profileName := RegExReplace(A_LoopFileName, "\.ini$", "")
-        
-        ; Skip if already loaded
+
         if (loadedProfiles.Has(profileName))
             continue
-            
-        ; Try to load this profile
+
         if (LoadSingleProfile(profileName, A_LoopFileName)) {
             loadedProfiles[profileName] := true
         }
     }
-    
-    ; Update the saved profile list to include all found profiles
+
     SaveProfileList()
 }
 
 LoadSingleProfile(profileName, profileFileName) {
     try {
-        ; Validate that this is actually a profile file by checking for required sections
         testRead := IniRead(profileFileName, "Crosshair", "Length", "NOTFOUND")
         if (testRead = "NOTFOUND")
             return false
@@ -994,11 +980,9 @@ LoadSingleProfile(profileName, profileFileName) {
         lines["left"] := IniRead(profileFileName, "Lines", "Left", settings["lines"]["left"])
         lines["right"] := IniRead(profileFileName, "Lines", "Right", settings["lines"]["right"])
         profileSettings["lines"] := lines
-        
-        ; Add to in-memory storage
+
         settings["profiles"][profileName] := profileSettings
-        
-        ; Add to GUI list
+
         profileList.Add([profileName])
         
         return true
