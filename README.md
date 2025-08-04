@@ -12,12 +12,11 @@ Great for all FPS type games and the Zoom feature is especially good for long ra
 - Customizable **color** (predefined palette: Green, Red, Blue, etc.)
 - **Optional outline** with configurable **color** and **thickness**
 - Toggle crosshair **visibility** on/off
-- **Right-click hide** option (automatically hides crosshair when right-clicking)
+- **Right-click hide** option (automatically hides crosshair when holding down right click)
 - **Per-line visibility** toggle (top, bottom, left, right)
 
 ### 🔍 Zoom Feature
-- Toggleable **zoom overlay** for precision aiming
-- Adjustable **zoom overlay size**
+- Toggleable **zoom overlay** for long ranged fights
 - Customizable **zoom hotkey** (default: `C`)
 - Supports both **toggle mode** and **hold-to-zoom**
 
@@ -25,12 +24,7 @@ Great for all FPS type games and the Zoom feature is especially good for long ra
 - **Save**, **load**, and **switch** between multiple crosshair configuration profiles saved with seperate .ini files
 
 ### 🖥️ GUI Interface
-- Clean, tabbed settings interface using AutoHotkey GUI
 - Tabs: **Crosshair**, **Profiles**, **Zoom**
-- Organized sections:
-  - General Settings
-  - Outline Settings
-  - Other Settings
 
 ---
 
@@ -41,7 +35,7 @@ Great for all FPS type games and the Zoom feature is especially good for long ra
 ## 🚀 Getting Started
 1. Install AutoHotkey v2.0
 2. Run `moris crosshair tool v1.0.ahk`
-3. Use the GUI to customize your crosshair
+3. Create your own Crosshair and have Fun
 
 ---
 
