@@ -28,6 +28,7 @@ global zoomGui := ""
 global overlaySize := 350
 global currentHotkey := ""
 global rightClickToggleState := true
+global isCapturingHotkey := false
 
 global settings := Map(
     "length", 5,
@@ -61,7 +62,7 @@ global colorMap := Map(
     "Orange", "FFA500"
 )
 
-global settingsGui := Gui("-Resize", "moris crosshair tool v1.1")
+global settingsGui := Gui("-Resize", "moris crosshair tool v1.2")
 settingsGui.OnEvent("Close", GuiClose)
 settingsGui.OnEvent("Escape", GuiClose)
 
@@ -159,8 +160,9 @@ zoomEnabledCB := settingsGui.Add("CheckBox", "x24 y60 vZoomEnabledCB Checked" (s
 zoomEnabledCB.OnEvent("Click", UpdateZoomSettings)
 
 settingsGui.Add("Text", "x24 y90 w80 h20", "Zoom Hotkey:")
-zoomHotkeyEdit := settingsGui.Add("Edit", "x24 y110 w100 h22 vZoomHotkeyEdit Uppercase Limit1", settings["zoomHotkey"])
-zoomHotkeyEdit.OnEvent("Change", UpdateZoomHotkey)
+zoomHotkeyEdit := settingsGui.Add("Edit", "x24 y110 w100 h22 vZoomHotkeyEdit ReadOnly", settings["zoomHotkey"])
+captureBtn := settingsGui.Add("Button", "x130 y110 w60 h22", "Capture")
+captureBtn.OnEvent("Click", StartHotkeyCapture)
 
 settingsGui.Add("Text", "x24 y140 w80 h20", "Zoom Mode:")
 zoomModeDropdown := settingsGui.Add("DropDownList", "x24 y160 w120 h200 vZoomMode Choose" (settings["zoomToggleMode"] ? "2" : "1"), ["Hold", "Toggle"])
@@ -213,7 +215,12 @@ SetupZoomHotkey() {
     
     if (settings["zoomEnabled"] && settings["zoomHotkey"] != "") {
         try {
-            currentHotkey := "~*" . settings["zoomHotkey"]
+            if (RegExMatch(settings["zoomHotkey"], "^(LButton|RButton)$")) {
+                currentHotkey := "*" . settings["zoomHotkey"]
+            } else {
+                currentHotkey := "~*" . settings["zoomHotkey"]
+            }
+            
             if (settings["zoomToggleMode"]) {
                 Hotkey(currentHotkey, ZoomToggle, "On")
             } else {
@@ -411,6 +418,136 @@ CleanupFile(keepFile) {
             }
         }
     }
+}
+
+StartHotkeyCapture(*) {
+    global
+    if (isCapturingHotkey) {
+        return
+    }
+    
+    isCapturingHotkey := true
+    captureBtn.Text := "Press Key"
+    zoomHotkeyEdit.Text := "Press any key..."
+    
+    SetupCaptureHotkeys()
+}
+
+SetupCaptureHotkeys() {
+    global
+    
+    letters := "abcdefghijklmnopqrstuvwxyz"
+    Loop Parse, letters {
+        try {
+            Hotkey("~*" . A_LoopField, CaptureHotkey, "On")
+        }
+    }
+    
+    Loop 10 {
+        try {
+            Hotkey("~*F" . A_Index, CaptureHotkey, "On")
+        }
+    }
+    
+    mouseButtons := ["LButton", "RButton", "MButton", "XButton1", "XButton2"]
+    for button in mouseButtons {
+        try {
+            Hotkey("~*" . button, CaptureHotkey, "On")
+        }
+    }
+    
+    try {
+        Hotkey("~*Escape", CancelCapture, "On")
+    }
+}
+
+CaptureHotkey(*) {
+    global
+    if (!isCapturingHotkey) {
+        return
+    }
+    
+    pressedKey := A_ThisHotkey
+    pressedKey := RegExReplace(pressedKey, "^~\*", "")
+    
+    CleanupCaptureHotkeys()
+    
+    settings["zoomHotkey"] := pressedKey
+    zoomHotkeyEdit.Text := pressedKey
+    captureBtn.Text := "Capture"
+    isCapturingHotkey := false
+    
+    SetupZoomHotkey()
+    
+    if (settings["currentProfile"] != "") {
+        profileName := settings["currentProfile"]
+        settings["profiles"][profileName]["zoomHotkey"] := settings["zoomHotkey"]
+    }
+    
+    SaveSettings()
+    
+    Sleep(50)
+}
+
+CancelCapture(*) {
+    global
+    if (!isCapturingHotkey) {
+        return
+    }
+    
+    CleanupCaptureHotkeys()
+    
+    zoomHotkeyEdit.Text := settings["zoomHotkey"]
+    captureBtn.Text := "Capture"
+    isCapturingHotkey := false
+    
+    Sleep(50)
+}
+
+ForceCleanupAllHotkeys() {
+    global
+    
+    Loop 3 {
+        try {
+            letters := "abcdefghijklmnopqrstuvwxyz"
+            Loop Parse, letters {
+                try {
+                    Hotkey("~*" . A_LoopField, "Off")
+                    Hotkey("*" . A_LoopField, "Off")
+                }
+            }
+            
+            Loop 10 {
+                try {
+                    Hotkey("~*F" . A_Index, "Off")
+                    Hotkey("*F" . A_Index, "Off")
+                }
+            }
+            
+            mouseButtons := ["LButton", "RButton", "MButton", "XButton1", "XButton2"]
+            for button in mouseButtons {
+                try {
+                    Hotkey("~*" . button, "Off")
+                    Hotkey("*" . button, "Off")
+                }
+            }
+            
+            try {
+                Hotkey("~*Escape", "Off")
+                Hotkey("*Escape", "Off")
+            }
+        }
+        
+        Sleep(10)
+    }
+}
+
+CleanupCaptureHotkeys() {
+    global
+    
+    ForceCleanupAllHotkeys()
+    
+    isCapturingHotkey := false
 }
 
 GetColorNameByHex(hexCode) {
@@ -720,7 +857,9 @@ UpdateZoomToggleMode(*) {
 
 UpdateZoomHotkey(*) {
     newHotkey := zoomHotkeyEdit.Text
-    if (newHotkey != "" && RegExMatch(newHotkey, "^[a-zA-Z]$")) {
+    if (newHotkey != "" && (RegExMatch(newHotkey, "^[a-zA-Z]$") || 
+        RegExMatch(newHotkey, "^F([1-9]|10)$") || 
+        RegExMatch(newHotkey, "^(LButton|RButton|MButton|XButton1|XButton2)$"))) {
         settings["zoomHotkey"] := newHotkey
         SetupZoomHotkey()
         
